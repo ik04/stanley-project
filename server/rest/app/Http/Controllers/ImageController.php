@@ -27,7 +27,7 @@ class ImageController extends Controller
             return response()->json($validation->errors()->all(),400);
         }
         $validated = $validation->validated();
-            $image = $request->file('message_file');
+            $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $imageName = 'image' . time() . '_' . uniqid() . '.' . $extension;
             Storage::disk('public')->put("/images/".$imageName, file_get_contents($image));
@@ -46,7 +46,7 @@ class ImageController extends Controller
                 "user_id" => $request->user()->id,
                 "image_path" => $publicPath
             ]);
-            if($validated["value"] && $validated["technique"]){
+            if(isset($validated["value"]) && isset($validated["technique"])){
                 $proccessing = ImageProcessing::create([
                     "image_id" => $image->id,
                     "technique" => $validated["technique"],

@@ -1,0 +1,20 @@
+{
+    "objects": [
+        {
+            "name": "Earth",
+            "type_id": 1
+        },
+        {
+            "name": "Mercury",
+            "type_id": 1
+        },
+        {
+            "name": "Venus",
+            "type_id": 1
+        },
+        {
+            "name": "Mars",
+            "type_id": 1
+        }
+    ]
+}

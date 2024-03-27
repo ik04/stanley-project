@@ -1,0 +1,19 @@
+{
+    "types": [
+        {
+            "type": "planet"
+        },
+        {
+            "type": "galaxy"
+        },
+        {
+            "type": "star"
+        },
+        {
+            "type": "white dwarf"
+        },
+        {
+            "type": "neutron star"
+        }
+    ]
+}
