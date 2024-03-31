@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export const AddPage = () => {
   const [name, setName] = useState("");
@@ -12,6 +12,18 @@ export const AddPage = () => {
   const [technique, setTechnique] = useState("");
   const [value, setValue] = useState("");
   const [isTechniqueFilled, setIsTechniqueFilled] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [object, setObject] = useState("");
+
+  const getCategories = async () => {
+    const resp = await axios.get(
+      `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/categories`
+    );
+    setCategories(resp.data.categories);
+  };
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   const handleSubmit = (event) => {
     try {
@@ -41,6 +53,7 @@ export const AddPage = () => {
         formData,
         { withCredentials: true }
       );
+      resetFields();
     } catch (err) {
       console.log(err);
     }
@@ -116,6 +129,11 @@ export const AddPage = () => {
           required
         />
         <label htmlFor="category">Category</label>
+        <select name="" onChange={(e) => setObject(e.target.value)} id="">
+          {categories.map((category) => (
+            <option value={category.id}>{category.name}</option>
+          ))}
+        </select>
         <h1>Image Processing</h1>
         <label htmlFor="technique">Technique</label>
         <input
