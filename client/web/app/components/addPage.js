@@ -25,7 +25,7 @@ export const AddPage = () => {
     getCategories();
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     try {
       event.preventDefault();
       // Validation
@@ -45,10 +45,11 @@ export const AddPage = () => {
       formData.append("specification", specification);
       formData.append("attachment", attachment);
       formData.append("image", image);
+      formData.append("object", object);
       formData.append("technique", technique || "");
       formData.append("value", value || "");
       console.log("Submitted data:", formData);
-      const resp = axios.post(
+      const resp = await axios.post(
         `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/upload`,
         formData,
         { withCredentials: true }
@@ -129,11 +130,18 @@ export const AddPage = () => {
           required
         />
         <label htmlFor="category">Category</label>
-        <select name="" onChange={(e) => setObject(e.target.value)} id="">
+        <select
+          name=""
+          value={object}
+          onChange={(e) => setObject(e.target.value)}
+        >
           {categories.map((category) => (
-            <option value={category.id}>{category.name}</option>
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
         </select>
+
         <h1>Image Processing</h1>
         <label htmlFor="technique">Technique</label>
         <input
