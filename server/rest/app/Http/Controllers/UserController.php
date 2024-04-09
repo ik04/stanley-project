@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,23 +14,36 @@ use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
-    public function register(Request $request){
-        $validation = Validator::make($request->all(),[
-            'name' =>'required|string',
-            "email"=>'required|string|unique:users',
-            'password'=>'required|string'
+    public function register(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'email' => 'required|string|unique:users',
+            'password' => 'required|string'
         ]);
-        if($validation->fails()){
-            return response()->json($validation->errors()->all(),400);
+        
+        if ($validation->fails()) {
+            return response()->json($validation->errors()->all(), 400);
         }
+        
         $validated = $validation->validated();
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'user_id' => Uuid::uuid4(),
-        ]);
-        return response()->json(['user'=>$user],201);
+
+        DB::beginTransaction();
+        try {
+            $uuid = Uuid::uuid4();
+            $sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+            DB::insert($sql, [
+                $validated['name'],
+                $validated['email'],
+                Hash::make($validated['password']),
+            ]);
+
+            DB::commit();
+            return response()->json(['message' => 'User registered successfully'], 201);
+        } catch (Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
     public function login(Request $request){
         $validation = Validator::make($request->all(),[
