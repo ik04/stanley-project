@@ -12,6 +12,7 @@ Route::get("user-data",[UserController::class,"userData"]);
 Route::get("categories",[CelestialObjectController::class,"index"]);
 
 Route::middleware(["auth:sanctum"])->group(function(){
+    Route::get("image-details/{imageId}",[ImageController::class,"fetchImageDetails"]);
     Route::post("logout",[UserController::class,"logout"]);
     Route::post("upload",[ImageController::class,"saveImage"]);
     Route::get("fetch-images",[ImageController::class,"fetchImages"]);

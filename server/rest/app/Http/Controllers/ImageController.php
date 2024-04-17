@@ -12,8 +12,23 @@ class ImageController extends Controller
 {
     public function fetchImages(Request $request){
         $userId = $request->user()->id;
-        $images = Image::select("name","image_path")->where("user_id",$userId)->get();
+        $images = Image::select("name","image_path","id")->where("user_id",$userId)->get();
         return response()->json(["images" => $images]);
+    }
+    public function fetchImageDetails(Request $request,$imageId){
+        $image = Image::join('equipment', 'images.equipment_id', '=', 'equipment.id')
+            ->join('celestial_objects', 'images.object_id', '=', 'celestial_objects.id')
+            ->select('images.name as image_name','images.image_path', 'equipment.manufacturer','equipment.model','equipment.specification','equipment.attachment', 'celestial_objects.name as object_name')
+            ->where("images.id",$imageId)
+            ->first();
+        // $image = Image::join('equipment', 'images.equipment_id', '=', 'equipment.id')
+        //     ->join('celestial_objects', 'images.object_id', '=', 'celestial_objects.id')
+        //     ->join('users', 'images.user_id', '=', 'users.id')
+        //     ->select('images.*', 'equipment.name as equipment_name', 'celestial_objects.name as celestial_object_name', 'users.name as user_name')
+        //     ->where("images.id",$imageId)
+        //     ->first();
+
+        return response()->json(["image" => $image]);
     }
     public function saveImage(Request $request)
     {
