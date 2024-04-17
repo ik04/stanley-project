@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -9,6 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class ImageController extends Controller
 {
+    public function fetchImages(Request $request){
+        $userId = $request->user()->id;
+        $images = Image::select("name","image_path")->where("user_id",$userId)->get();
+        return response()->json(["images" => $images]);
+    }
     public function saveImage(Request $request)
     {
         $validation = Validator::make($request->all(), [
@@ -33,7 +39,7 @@ class ImageController extends Controller
         $imageName = 'image' . time() . '_' . uniqid() . '.' . $extension;
         Storage::disk('public')->put("/images/" . $imageName, file_get_contents($image));
         $url = Storage::url("images/" . $imageName);
-        $publicPath = public_path($url);
+        $publicPath = $url;
 
         DB::beginTransaction();
         try {

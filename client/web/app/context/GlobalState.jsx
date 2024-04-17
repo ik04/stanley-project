@@ -6,6 +6,7 @@ import axios from "axios";
 export const GlobalState = ({ children }) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [token, setToken] = useState("");
 
   useEffect(() => {
     const callUserData = async () => {
@@ -17,6 +18,7 @@ export const GlobalState = ({ children }) => {
           "Authorization"
         ] = `Bearer ${resp.data.access_token}`;
         setEmail(resp.data.email);
+        setToken(resp.data.access_token);
         setName(resp.data.name);
       } catch (error) {
         console.log(error);
@@ -27,6 +29,7 @@ export const GlobalState = ({ children }) => {
   const globalStateValue = {
     email: email,
     name: name,
+    token: token,
   };
   return (
     <GlobalContext.Provider value={globalStateValue}>

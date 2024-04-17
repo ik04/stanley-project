@@ -38,6 +38,7 @@ class UserController extends Controller
                 Hash::make($validated['password']),
             ]);
 
+            // *  created_at and updated_at are null when you use shitty db query builder
             DB::commit();
             return response()->json(['message' => 'User registered successfully'], 201);
         } catch (Exception $e) {

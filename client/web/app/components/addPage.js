@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 export const AddPage = () => {
@@ -13,12 +14,13 @@ export const AddPage = () => {
   const [value, setValue] = useState("");
   const [isTechniqueFilled, setIsTechniqueFilled] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [object, setObject] = useState("");
+  const [object, setObject] = useState(1);
 
   const getCategories = async () => {
     const resp = await axios.get(
       `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/categories`
     );
+    console.log(resp.data.categories);
     setCategories(resp.data.categories);
   };
   useEffect(() => {
@@ -73,7 +75,10 @@ export const AddPage = () => {
   };
 
   return (
-    <div className="bg-white h-screen flex justify-center items-center">
+    <div className="bg-white h-screen flex space-y-5 flex-col justify-center items-center">
+      <Link className="text-xl text-center" href={"/main"}>
+        View all
+      </Link>
       <form className="form flex flex-col space-y-3" onSubmit={handleSubmit}>
         <label htmlFor="name">Name</label>
         <input

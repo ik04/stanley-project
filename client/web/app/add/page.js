@@ -7,7 +7,7 @@ export default async function page() {
   try {
     const cookieStore = cookies();
     const authToken = cookieStore.get("at");
-    console.log(authToken?.value);
+    // console.log(authToken?.value);
     const url = `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/user-data`;
     const resp = await axios.get(url, {
       headers: { Cookie: `at=${authToken?.value}` },
