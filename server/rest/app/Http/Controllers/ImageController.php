@@ -10,26 +10,40 @@ use Illuminate\Support\Facades\DB;
 
 class ImageController extends Controller
 {
-    public function fetchImages(Request $request){
+    public function fetchImages(Request $request)
+    {
         $userId = $request->user()->id;
-        $images = Image::select("name","image_path","id")->where("user_id",$userId)->get();
+        
+        $sql = "SELECT name, image_path, id FROM images WHERE user_id = ?";
+        $images = DB::select($sql, [$userId]);
+    
         return response()->json(["images" => $images]);
     }
-    public function fetchImageDetails(Request $request,$imageId){
-        $image = Image::join('equipment', 'images.equipment_id', '=', 'equipment.id')
-            ->join('celestial_objects', 'images.object_id', '=', 'celestial_objects.id')
-            ->select('images.name as image_name','images.image_path', 'equipment.manufacturer','equipment.model','equipment.specification','equipment.attachment', 'celestial_objects.name as object_name')
-            ->where("images.id",$imageId)
-            ->first();
-        // $image = Image::join('equipment', 'images.equipment_id', '=', 'equipment.id')
-        //     ->join('celestial_objects', 'images.object_id', '=', 'celestial_objects.id')
-        //     ->join('users', 'images.user_id', '=', 'users.id')
-        //     ->select('images.*', 'equipment.name as equipment_name', 'celestial_objects.name as celestial_object_name', 'users.name as user_name')
-        //     ->where("images.id",$imageId)
-        //     ->first();
-
+    
+    public function fetchImageDetails(Request $request, $imageId)
+    {
+        $sql = "SELECT 
+                    images.name as image_name,
+                    images.image_path, 
+                    equipment.manufacturer,
+                    equipment.model,
+                    equipment.specification,
+                    equipment.attachment, 
+                    celestial_objects.name as object_name
+                FROM images
+                JOIN equipment ON images.equipment_id = equipment.id
+                JOIN celestial_objects ON images.object_id = celestial_objects.id
+                WHERE images.id = ?";
+    
+        $image = DB::selectOne($sql, [$imageId]);
+    
+        if (!$image) {
+            return response()->json(['error' => 'Image not found'], 404);
+        }
+    
         return response()->json(["image" => $image]);
     }
+    
     public function saveImage(Request $request)
     {
         $validation = Validator::make($request->all(), [
