@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Equipment;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,8 @@ class ImageController extends Controller
                     equipment.model,
                     equipment.specification,
                     equipment.attachment, 
-                    celestial_objects.name as object_name
+                    celestial_objects.name as object_name,
+                    celestial_objects.id as object_id
                 FROM images
                 JOIN equipment ON images.equipment_id = equipment.id
                 JOIN celestial_objects ON images.object_id = celestial_objects.id
@@ -43,6 +45,52 @@ class ImageController extends Controller
     
         return response()->json(["image" => $image]);
     }
+
+    public function updateImageDetails(Request $request, $imageId){
+        $validation = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'manufacturer' => 'required|string',
+            'model' => 'required|string',
+            'specification' => 'required|string',
+            'attachment' => 'required|string',
+            'object' => 'required|integer',
+        ]);
+    
+        if ($validation->fails()) {
+            return response()->json(['errors' => $validation->errors()], 400);
+        }
+    
+        $image = Image::where("id", $imageId)->first();
+        if (!$image) {
+            return response()->json(['error' => 'Image not found'], 404);
+        }
+    
+        DB::beginTransaction();
+        try {
+            $image->name = $request->name;
+            $image->object_id = $request->object;
+            $image->save();
+    
+            $equipment = Equipment::find($image->equipment_id);
+            if (!$equipment) {
+                return response()->json(['error' => 'Associated equipment not found'], 404);
+            }
+    
+            $equipment->manufacturer = $request->manufacturer;
+            $equipment->model = $request->model;
+            $equipment->specification = $request->specification;
+            $equipment->attachment = $request->attachment;
+            $equipment->save();
+    
+            DB::commit();
+            return response()->json(['message' => 'Image details updated successfully'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Failed to update image details'], 500);
+        }
+    }
+    
+    
     
     public function saveImage(Request $request)
     {

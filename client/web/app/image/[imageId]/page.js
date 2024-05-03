@@ -1,3 +1,4 @@
+import EditButton from "@/app/components/editButton";
 import axios from "axios";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -26,12 +27,24 @@ export default async function page({ params }) {
     `${process.env.NEXT_PUBLIC_DOMAIN_NAME}/api/image-details/${imageId}`,
     { withCredentials: true }
   );
+  console.log(resp.data);
   return (
     <div className="h-screen flex flex-col items-center space-y-6">
       <div className="text-black text-center p-5 text-3xl capitalize">
         {resp.data.image.image_name}
       </div>
-      <Link href={"/main"}>View All</Link>
+      <div className="flex space-x-4">
+        <Link href={"/main"}>View All</Link>
+        <EditButton
+          originalObject={resp.data.image.object_id}
+          originalModel={resp.data.image.model}
+          originalSpecification={resp.data.image.specification}
+          originalAttachment={resp.data.image.attachment}
+          originalManufacturer={resp.data.image.manufacturer}
+          originalName={resp.data.image.image_name}
+          imageId={imageId}
+        />
+      </div>
       <img
         src={`${process.env.NEXT_PUBLIC_DOMAIN_NAME}${resp.data.image.image_path}`}
         className="w-[1000px]"
