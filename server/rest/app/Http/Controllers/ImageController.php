@@ -60,27 +60,29 @@ class ImageController extends Controller
             return response()->json(['errors' => $validation->errors()], 400);
         }
     
-        $image = Image::where("id", $imageId)->first();
-        if (!$image) {
-            return response()->json(['error' => 'Image not found'], 404);
-        }
-    
         DB::beginTransaction();
         try {
-            $image->name = $request->name;
-            $image->object_id = $request->object;
-            $image->save();
+            // Update image details
+            DB::update('UPDATE images SET name = ?, object_id = ? WHERE id = ?', [
+                $request->name,
+                $request->object,
+                $imageId
+            ]);
     
-            $equipment = Equipment::find($image->equipment_id);
-            if (!$equipment) {
-                return response()->json(['error' => 'Associated equipment not found'], 404);
-            }
-    
-            $equipment->manufacturer = $request->manufacturer;
-            $equipment->model = $request->model;
-            $equipment->specification = $request->specification;
-            $equipment->attachment = $request->attachment;
-            $equipment->save();
+            // Update equipment details
+            DB::update('UPDATE equipment 
+                        SET manufacturer = ?, model = ?, specification = ?, attachment = ?
+                        WHERE id = (
+                            SELECT equipment_id 
+                            FROM images 
+                            WHERE id = ?
+                        )', [
+                $request->manufacturer,
+                $request->model,
+                $request->specification,
+                $request->attachment,
+                $imageId
+            ]);
     
             DB::commit();
             return response()->json(['message' => 'Image details updated successfully'], 200);
@@ -89,7 +91,6 @@ class ImageController extends Controller
             return response()->json(['error' => 'Failed to update image details'], 500);
         }
     }
-    
     
     
     public function saveImage(Request $request)
